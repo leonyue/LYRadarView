@@ -10,7 +10,10 @@
 
 @interface LYRadarView : UIView
 
-@property (nonatomic, assign) int innerCircleCount;
-@property (nonatomic, assign) int aircraftInInnerCircleX;
+@property (nonatomic, assign) int    innerCircleCount;
+@property (nonatomic, assign) float  aircraftToCenterPercent;
+@property (nonatomic, assign) double aircraftAngle;
+@property (nonatomic, assign) double aircraftRotateAngle;
+@property (nonatomic, assign) double northAngle;
 
 @end

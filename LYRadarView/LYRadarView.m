@@ -15,23 +15,55 @@ static const CGFloat    kCrossLineWidth      = .5f;
 static const CGFloat    kTriAngleWidth       = 5.f;
 static const CGFloat    kRadarEdge           = 5.f;
 
-@implementation LYRadarView
+@interface LYRadarView() {
+    double scanStartAngle;
+}
 
+@property (nonatomic, weak) CADisplayLink *dl;
+
+@end
+
+@implementation LYRadarView
 
 - (void)awakeFromNib {
     [super awakeFromNib];
-    self.innerCircleCount = 2;
-    self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
-    
-    CADisplayLink *dl = [CADisplayLink displayLinkWithTarget:self selector:@selector(update:)];
-    [dl addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+    [self setUp];
 }
 
-static double halfStart = 0;
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setUp];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [self.dl invalidate];
+    self.dl = nil;
+}
+
+
+- (void)setUp {
+    self.innerCircleCount = 2;
+    self.aircraftToCenterPercent = 0.2;
+    self.aircraftAngle = M_PI_4;
+    self.aircraftRotateAngle = M_PI_2;
+    self.northAngle = M_PI_4 * 5;
+    
+    self.backgroundColor = [UIColor clearColor];
+    CADisplayLink *dl = [CADisplayLink displayLinkWithTarget:self selector:@selector(update:)];
+    [dl addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    self.dl = dl;
+}
 
 - (void)update:(CADisplayLink *)link {
-    halfStart += (M_PI / 100);
+    scanStartAngle += (M_PI / 100);
     [self setNeedsDisplay];
+}
+
+
+- (void)testAnim:(CADisplayLink *)link {
 }
 
 - (void)drawRect:(CGRect)rect {
@@ -40,7 +72,7 @@ static double halfStart = 0;
     [self drawOuterCircleWithRadius:radarRadius center:center];
     [self drawInnerCircleWithRadius:radarRadius center:center];
     [self drawHalfCircleWithRadius:radarRadius center:center];
-    [self drawAircraftAtcenter:center];
+    [self drawAircraftWithRadius:radarRadius center:center];
     [self drawHalfCircle2WithRadius:radarRadius center:center];
     [self drawCrossLineWithRadius:radarRadius center:center];
     [self drawHomeAtCenter:center];
@@ -119,7 +151,7 @@ static double halfStart = 0;
     int c = 0x00ffa8;
     UIColor *color = [UIColor colorWithRed:(c >> 8 & 0x0000FF) / 255.f green:(c >> 4 & 0x0000ff) / 255.f blue:(c & 0x0000ff) /255.f alpha:0.35];
     CGContextSetFillColorWithColor(context, color.CGColor);
-    CGContextAddArc(context, center.x, center.y, radius, halfStart, halfStart + M_PI, 0);
+    CGContextAddArc(context, center.x, center.y, radius, scanStartAngle, scanStartAngle + M_PI, 0);
     CGContextFillPath(context);
 }
 
@@ -127,32 +159,42 @@ static double halfStart = 0;
     CGContextRef context = UIGraphicsGetCurrentContext();
     //#00ffa8
     CGContextSetFillColorWithColor(context, [[UIColor blackColor] colorWithAlphaComponent:0.6].CGColor);
-    CGContextAddArc(context, center.x, center.y, radius, halfStart + M_PI, halfStart + 2 * M_PI, 0);
+    CGContextAddArc(context, center.x, center.y, radius, scanStartAngle + M_PI, scanStartAngle + 2 * M_PI, 0);
     CGContextFillPath(context);
 }
 
 - (void)drawHomeAtCenter:(CGPoint)center {
-    UIImage *image = [UIImage imageNamed:@"home"];
+    UIImage *image = [UIImage imageNamed:@"map_radar_home"];
     [self drawImage:image AtCenter:center];
 }
 
 - (void)drawNorthWithRadius:(CGFloat)radius center:(CGPoint)center {
     CGPoint p = center;
-    CGFloat angle = M_PI_4 * 5 / 4;
+    CGFloat angle = self.northAngle;
     p.x += cos(angle) * radius;
     p.y += sin(angle) * radius;
-    UIImage *image = [UIImage imageNamed:@"north"];
+    UIImage *image = [UIImage imageNamed:@"map_radar_north"];
     [self drawImage:image AtCenter:p];
 }
 
-- (void)drawAircraftAtcenter:(CGPoint)center {
+- (void)drawAircraftWithRadius:(CGFloat)radius center:(CGPoint)center {
     CGPoint p = center;
-    CGFloat angle = M_PI_4 * 5 / 4;
-    CGFloat r = 20.f;
+    CGFloat angle = self.aircraftAngle;
+    CGFloat r = radius * self.aircraftToCenterPercent;
     p.x += cos(angle) * r;
     p.y += sin(angle) * r;
-    UIImage *image = [UIImage imageNamed:@"aircraft"];
+    UIImage *image = [UIImage imageNamed:@"map_radar_aircraft"];
+    
+    CGContextSaveGState(UIGraphicsGetCurrentContext());
+    CGAffineTransform t = CGAffineTransformIdentity;
+    t = CGAffineTransformTranslate(t, p.x, p.y);
+    t = CGAffineTransformRotate(t, self.aircraftRotateAngle);
+    t = CGAffineTransformTranslate(t, - p.x, -p.y);
+    CGContextConcatCTM(UIGraphicsGetCurrentContext(), t);
     [self drawImage:image AtCenter:p];
+    CGContextRestoreGState(UIGraphicsGetCurrentContext());
+//    CGContextRestoreGState(context);
+    
 }
 
 #pragma mark - private
@@ -169,8 +211,8 @@ static double halfStart = 0;
     origin.y -= size.height / 2.f;
     rect.size = size;
     rect.origin = origin;
-    UIGraphicsPushContext(context);
+//    UIGraphicsPushContext(context);
     [image drawInRect:rect];
-    UIGraphicsPopContext();
+//    UIGraphicsPopContext();
 }
 @end

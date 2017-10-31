@@ -320,6 +320,7 @@
 				1BB345AD1FA2C9D8008AE715 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
