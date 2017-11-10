@@ -20,10 +20,15 @@ static const CGFloat    kRadarEdge           = 5.f;
 }
 
 @property (nonatomic, weak) CADisplayLink *dl;
+@property (nonatomic, assign) NSTimeInterval northAngleAnimStartAt;
+@property (nonatomic, assign) double northAngleAddPerSeconds; ///< anim finish in 0.3s
+@property (nonatomic, assign) double northAngleDest;
 
 @end
 
 @implementation LYRadarView
+
+#pragma mark - inherit
 
 - (void)awakeFromNib {
     [super awakeFromNib];
@@ -43,6 +48,7 @@ static const CGFloat    kRadarEdge           = 5.f;
     self.dl = nil;
 }
 
+#pragma mark - private
 
 - (void)setUp {
     self.innerCircleCount = 2;
@@ -57,14 +63,58 @@ static const CGFloat    kRadarEdge           = 5.f;
     self.dl = dl;
 }
 
+#pragma mark - setter
+
+- (void)setNorthAngle:(double)northAngle {
+    if (northAngle != _northAngle) {
+        self.northAngleAnimStartAt = self.dl.timestamp;
+        
+        ///0 ~ 360
+        while (northAngle > M_PI * 2) northAngle -= M_PI * 2;
+        while (northAngle < 0) northAngle += M_PI * 2;
+        
+        while (_northAngle > M_PI * 2) _northAngle -= M_PI * 2;
+        while (_northAngle < 0) _northAngle += M_PI * 2;
+        
+        
+        double diff;
+        ///choose a smaller arc
+        if (northAngle - _northAngle > M_PI) {
+            _northAngle += M_PI * 2;
+        } else if (northAngle - _northAngle < -M_PI) {
+            _northAngle -= M_PI * 2;
+        }
+        
+        diff = northAngle - _northAngle;
+        
+        self.northAngleAddPerSeconds = diff / 0.3f;
+        self.northAngleDest = northAngle;
+    }
+}
+
+#pragma mark - refresh
+
 - (void)update:(CADisplayLink *)link {
-    scanStartAngle += (M_PI / 100);
+    //animate scan
+    scanStartAngle += (M_PI * link.duration / 3.f); //half circle per 3 seconds
+    if (scanStartAngle > M_PI * 2) scanStartAngle -= M_PI * 2;
+    
+    //animate north
+    if (self.northAngleDest == self.northAngle) {
+    } else if (fabs(self.northAngleDest - self.northAngle) < fabs(self.northAngleAddPerSeconds *  (link.timestamp - self.northAngleAnimStartAt))) {
+        _northAngle = self.northAngleDest;
+    } else {
+        _northAngle += self.northAngleAddPerSeconds *  (link.timestamp - self.northAngleAnimStartAt);
+    }
+    
     [self setNeedsDisplay];
 }
 
 
 - (void)testAnim:(CADisplayLink *)link {
 }
+
+#pragma mark - draw
 
 - (void)drawRect:(CGRect)rect {
     CGFloat radarRadius = MIN(CGRectGetWidth(rect), CGRectGetHeight(rect)) / 2.f - kRadarEdge;
@@ -193,17 +243,15 @@ static const CGFloat    kRadarEdge           = 5.f;
     CGContextConcatCTM(UIGraphicsGetCurrentContext(), t);
     [self drawImage:image AtCenter:p];
     CGContextRestoreGState(UIGraphicsGetCurrentContext());
-//    CGContextRestoreGState(context);
     
 }
 
-#pragma mark - private
+#pragma mark - private draw image
 
 - (void)drawImage:(UIImage *)image AtCenter:(CGPoint)center {
     if (image == nil) {
         return;
     }
-    CGContextRef context = UIGraphicsGetCurrentContext();
     CGSize size = image.size;
     CGRect rect = CGRectZero;
     CGPoint origin = center;
@@ -211,8 +259,6 @@ static const CGFloat    kRadarEdge           = 5.f;
     origin.y -= size.height / 2.f;
     rect.size = size;
     rect.origin = origin;
-//    UIGraphicsPushContext(context);
     [image drawInRect:rect];
-//    UIGraphicsPopContext();
 }
 @end
