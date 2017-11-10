@@ -30,6 +30,21 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - IBAction
+
+- (IBAction)slideA:(UISlider *)sender {
+    self.radarView.aircraftToCenterPercent = sender.value;
+}
+- (IBAction)slideB:(UISlider *)sender {
+    self.radarView.aircraftAngle = sender.value;
+}
+- (IBAction)slideC:(UISlider *)sender {
+    self.radarView.aircraftRotateAngle = sender.value;
+}
+- (IBAction)slideD:(UISlider *)sender {
+    self.radarView.innerCircleCount = (int)sender.value;
+}
+
 #pragma mark - location manager delegate
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)newHeading {

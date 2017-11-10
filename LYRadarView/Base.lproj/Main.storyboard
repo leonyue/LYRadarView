@@ -26,6 +26,34 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="m5q-Is-pzn" userLabel="aircraft to center percent slider">
+                                <rect key="frame" x="116" y="83" width="118" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="slideA:" destination="BYZ-38-t0r" eventType="valueChanged" id="vvG-Zr-hZ9"/>
+                                </connections>
+                            </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="6.2800000000000002" translatesAutoresizingMaskIntoConstraints="NO" id="oPw-o0-1oR" userLabel="aircraft angle slider">
+                                <rect key="frame" x="118" y="137" width="118" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="slideB:" destination="BYZ-38-t0r" eventType="valueChanged" id="UjP-ea-PkT"/>
+                                </connections>
+                            </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="6.2800000000000002" translatesAutoresizingMaskIntoConstraints="NO" id="qvX-lc-lNZ" userLabel="aircraft rotate angle">
+                                <rect key="frame" x="120" y="174" width="118" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="slideC:" destination="BYZ-38-t0r" eventType="valueChanged" id="lWp-zM-74z"/>
+                                </connections>
+                            </slider>
+                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="10" translatesAutoresizingMaskIntoConstraints="NO" id="Q4b-WI-HF7" userLabel="innerCircle count">
+                                <rect key="frame" x="114" y="45" width="118" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="slideD:" destination="BYZ-38-t0r" eventType="valueChanged" id="PWt-tf-dG6"/>
+                                </connections>
+                            </slider>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.70245612160000004" colorSpace="calibratedRGB"/>
                     </view>
